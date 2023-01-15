@@ -6,6 +6,7 @@ include_once '../classes/Database.php';
 include_once '../models/IndicatorTable.php';
 include_once '../models/ColumnOptions.php';
 
+
 $db_connection = new Database();
 $db = $db_connection->dbConnection();
 

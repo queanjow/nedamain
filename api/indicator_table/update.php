@@ -12,6 +12,7 @@ include_once '../models/ColumnOptions.php';
 $db_connection = new Database();
 $db = $db_connection->dbConnection();
 
+
 class CreateHandler
 {
     private $indicatorTableModel;
