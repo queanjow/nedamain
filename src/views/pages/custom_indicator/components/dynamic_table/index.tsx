@@ -29,7 +29,7 @@ import ToolkitProvider, {
 import ReactToPrint from 'react-to-print';
 import { RowResponse, RowRequest } from '../..';
 
-const REACT_APP_API_URL = 'http://localhost/sedgis/api';
+const { REACT_APP_API_URL } = process.env;
 interface ColumnOptions {
     id: number;
     name: string;
