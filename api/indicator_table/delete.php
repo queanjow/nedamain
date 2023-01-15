@@ -5,10 +5,10 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once '../classes/Database.php';
+include_once  '../classes/Database.php';
 include_once '../models/IndicatorTable.php';
 include_once '../models/ColumnOptions.php';
-
+require '../classes/JwtHandler.php';
 
 $db_connection = new Database();
 $db = $db_connection->dbConnection();
