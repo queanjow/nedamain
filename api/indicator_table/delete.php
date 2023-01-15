@@ -5,12 +5,12 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once '../classes/Database.php';
+include_once '../DbConnect.php';
 include_once '../models/IndicatorTable.php';
 include_once '../models/ColumnOptions.php';
 
-$dbconnection = new Database();
-$db = $dbconnection->dbConnection();
+$database = new DbConnect();
+$db = $database->connect();
 
 class RequestHandler
 {

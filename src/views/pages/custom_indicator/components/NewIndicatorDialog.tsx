@@ -38,7 +38,7 @@ const NewIndicatorDialog = ({
     return (
         <Dialog
             fullWidth={true}
-            maxWidth="md"
+            maxWidth="sm"
             open={isOpen}
             onClose={onCloseClicked}>
             <DialogTitle>{title}</DialogTitle>

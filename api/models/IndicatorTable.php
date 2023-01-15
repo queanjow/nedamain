@@ -156,7 +156,7 @@ class IndicatorTable
         $unitID = $data['unitID'];
         $yearID = $data['yearID'];
         $value = $data['value'];
-      
+
         $SQL_INSERT =  "INSERT INTO indicator_rows (
             indicator_table_id,
             location_id,
@@ -165,7 +165,7 @@ class IndicatorTable
             year_id,
             indicator_value
         ) 
-        VALUES ({$tableID},{$locationID},{$subIndicatorID},{$yearID},{$unitID},{$value});";
+        VALUES ({$tableID},{$locationID},{$subIndicatorID},{$unitID},{$yearID},{$value});";
 
         $stmt = $this->conn->prepare($SQL_INSERT);
         $isInserted =  $stmt->execute();
@@ -176,6 +176,102 @@ class IndicatorTable
         } else {
             return null;
         }
+    }
+    private function validateRows($rowsData)
+    {
+        $rowsID_Assoc = array();
+
+        if (count($rowsData) > 0) {
+            foreach ($rowsData as $row) {
+                $row_value = $row['value'];
+                $DB_ASSOC_ID_AND_VAL = [
+                    'location' => null,
+                    'subIndicator' => null,
+                    'unit' => null,
+                    'year' => null,
+                    'value' => null,
+                ];
+                $SQL_CHECK = [
+                    'location' =>  "SELECT * FROM admin_location WHERE LOWER(title)='{$row['location']}'",
+                    'subIndicator' => "SELECT * FROM sub_indicator WHERE LOWER(title)='{$row['subIndicator']}'",
+                    'unit' => "SELECT * FROM indicator_unit WHERE LOWER(title)='{$row['unit']}'",
+                    'year' => "SELECT * FROM year_options WHERE LOWER(title)='{$row['year']}'"
+                ];
+
+                if (is_numeric($row_value)) {
+                    $DB_ASSOC_ID_AND_VAL['value'] = $row_value;
+                } else {
+                    throw new Exception("Value is not numeric!");
+                }
+
+                foreach ($SQL_CHECK as $key => $value) {
+                    $stmt = $this->conn->query($SQL_CHECK[$key]);
+                    $res = $stmt->fetch();
+
+                    if (!$res) {
+                        throw new Exception("No {$key} value found.");
+                    } else {
+                        $DB_ASSOC_ID_AND_VAL[$key] = $res['id'];
+                    }
+                }
+
+                array_push($rowsID_Assoc, $DB_ASSOC_ID_AND_VAL);
+            }
+        } else {
+            throw new Exception("No rows of data to be inserted!");
+        }
+
+        return $rowsID_Assoc;
+    }
+    public function importCreateTable($tableName, $rowsData)
+    {
+
+        try {
+            $insertedTable = null;
+            $validatedRows = $this->validateRows($rowsData);
+
+            if (count($validatedRows) !== 0) {
+                $insertedTable = $this->createTable(($tableName));
+
+                foreach ($validatedRows as $validatedRow) {
+
+                    $SQL_INSERT =  "INSERT INTO indicator_rows (
+                        indicator_table_id,
+                        location_id,
+                        sub_indicator_id,
+                        unit_id,
+                        year_id,
+                        indicator_value
+                    ) 
+                    VALUES ({$insertedTable['id']},
+                    {$validatedRow['location']},
+                    {$validatedRow['subIndicator']},
+                    {$validatedRow['unit']},
+                    {$validatedRow['year']},
+                    {$validatedRow['value']});";
+
+                    $stmt = $this->conn->prepare($SQL_INSERT);
+                    $isInserted =  $stmt->execute();
+
+                    if (!$isInserted) {
+                        throw new Exception("Error while importing files");
+                    }
+                }
+            }
+
+            if ($insertedTable !== null) {
+                return [
+                    'id' => $insertedTable['id'],
+                    'name' => $insertedTable['name'],
+                ];
+            }
+        } catch (Exception $err) {
+            echo json_encode(['message' => $err->getMessage()]);
+            http_response_code(203);
+            die();
+        }
+
+        return null;
     }
 
     // Update Region

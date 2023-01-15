@@ -98,8 +98,8 @@ export default function StyledTreeItem({
                 </Box>
             }
             style={{
-                color : '--tree-view-color',
-                
+                '--tree-view-color': color,
+                '--tree-view-bg-color': bgColor
             }}
             {...other}
         />

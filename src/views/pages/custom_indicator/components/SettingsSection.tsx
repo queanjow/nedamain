@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { SyntheticEvent } from 'react';
 import TreeView from '@mui/lab/TreeView';
+
 import ForumIcon from '@mui/icons-material/Forum';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';

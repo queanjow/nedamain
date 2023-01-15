@@ -1,23 +1,18 @@
 import React, { useEffect, useState, Fragment, useId } from 'react';
 import SettingsSection from './components/SettingsSection';
-
 import { nanoid } from 'nanoid';
 import {
     Box,
     Avatar,
     Divider,
     Typography,
-    IconButton,
     Button,
-    Backdrop,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Tooltip
+    Snackbar,
+    IconButton,
+    Alert,
+    AlertColor
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import LayersClearIcon from '@mui/icons-material/LayersClear';
 import AddIcon from '@mui/icons-material/Add';
 import { Stack } from '@mui/system';
@@ -25,7 +20,7 @@ import NewIndicatorDialog from './components/NewIndicatorDialog';
 import DynamicIndicatorTable from './components/dynamic_table';
 import GenericDialog from './components/GenericDialog';
 import axios from 'axios';
-
+import ImportDialog from './components/ImportDialog';
 export interface RowResponse {
     id: number;
     location: string;
@@ -48,19 +43,38 @@ export interface IndicatorTableType {
     name: string;
     rows: RowResponse[];
 }
-
 const { REACT_APP_API_URL } = process.env;
 const CustomIndicatorDashboard = () => {
     const [tableKey, setTableKey] = useState(nanoid());
     const [showDelete, setShowDelete] = useState(false);
     const [showNewIndicatorDialog, setShowNewIndicatorDialog] = useState(false);
     const [showEditIndicatorName, setShowEditIndicatorName] = useState(false);
+    const [showImportCSV, setShowImportCSV] = useState(false);
     const [currentTableData, setCurrentTableData] =
         useState<IndicatorTableType | null>(null);
     const [tableList, setTableList] = useState<
         { id: number; name: string }[] | null
     >(null);
+    const [openSnackBar, setOpenSnackBar] = React.useState({
+        color: 'error',
+        isOpen: false,
+        message: ''
+    });
 
+    const snackBarCloseHandler = (
+        event: React.SyntheticEvent | Event,
+        reason?: string
+    ) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpenSnackBar({
+            color: 'error',
+            isOpen: false,
+            message: ''
+        });
+    };
     const onReportListClicked = (tableID: number) => {
         axios
             .get<IndicatorTableType>(
@@ -77,8 +91,6 @@ const CustomIndicatorDashboard = () => {
     };
 
     const onAddRowEntry = (tableID: number, rowData: RowRequest) => {
-        console.log(`TableID: ${tableID} rowData: ${JSON.stringify(rowData)}`);
-
         axios
             .post<RowResponse>(
                 `${REACT_APP_API_URL}/indicator_table/create.php`,
@@ -92,7 +104,6 @@ const CustomIndicatorDashboard = () => {
                 if (res.status === 200) {
                     const tempRow = [...currentTableData.rows];
                     tempRow.push(res.data);
-
                     setCurrentTableData({ ...currentTableData, rows: tempRow });
                     setTableKey(nanoid());
                 } else {
@@ -243,6 +254,19 @@ const CustomIndicatorDashboard = () => {
             });
     };
 
+    const onImportTableSuccess = (importedTable: {
+        id: number;
+        name: string;
+    }) => {
+        // This is improvises solution only — bad practice to trigger re-render :(😢
+        setOpenSnackBar({
+            color: 'success',
+            isOpen: true,
+            message: `Successfully imported: ${importedTable.name}`
+        });
+        setTableList([...tableList, importedTable]);
+    };
+
     useEffect(() => {
         axios
             .get<{ id: number; name: string }[]>(
@@ -251,7 +275,6 @@ const CustomIndicatorDashboard = () => {
             .then((res) => {
                 setTableList(res.data);
             });
-        console.log('Use effect called');
     }, [JSON.stringify(tableList), JSON.stringify(currentTableData)]);
 
     return (
@@ -262,6 +285,26 @@ const CustomIndicatorDashboard = () => {
                 flexDirection: 'column',
                 display: 'flex'
             }}>
+            <Snackbar
+                open={openSnackBar.isOpen}
+                autoHideDuration={6000}
+                onClose={snackBarCloseHandler}
+                action={
+                    <IconButton
+                        size="small"
+                        aria-label="close"
+                        color="inherit"
+                        onClick={snackBarCloseHandler}>
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                }>
+                <Alert
+                    onClose={snackBarCloseHandler}
+                    severity={openSnackBar.color as AlertColor}
+                    sx={{ width: '100%' }}>
+                    {openSnackBar.message}
+                </Alert>
+            </Snackbar>
             {currentTableData !== null ? (
                 <GenericDialog
                     titleColor="error"
@@ -287,6 +330,23 @@ const CustomIndicatorDashboard = () => {
                 onSaveClicked={(indicatorName: string) => {
                     onEditTableName(indicatorName, currentTableData.id);
                 }}></NewIndicatorDialog>
+            <ImportDialog
+                title={'Import CSV'}
+                message={'Please click select a CSV file to import.'}
+                isOpen={showImportCSV}
+                onCloseClicked={() => {
+                    setShowImportCSV(false);
+                }}
+                onFailed={(msg) => {
+                    setOpenSnackBar({
+                        color: 'error',
+                        isOpen: true,
+                        message: `Importing Failed: ${msg}`
+                    });
+                }}
+                onSaveSuccess={(importedTable) => {
+                    onImportTableSuccess(importedTable);
+                }}></ImportDialog>
             <NewIndicatorDialog
                 title={'Add Table'}
                 message={'Enter name for the new table.'}
@@ -344,6 +404,14 @@ const CustomIndicatorDashboard = () => {
                                     showAddNewIndicatorDialog(true);
                                 }}>
                                 Add Table
+                            </Button>
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                    setShowImportCSV(true);
+                                }}>
+                                Import CSV
                             </Button>
                             {currentTableData !== null ? (
                                 <>
