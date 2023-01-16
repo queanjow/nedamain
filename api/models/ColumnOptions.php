@@ -46,6 +46,9 @@ class ColumnOptions
             case 'units':
                 $result = $this->queryOptions('indicator_unit');
                 break;
+            case 'periods':
+                $result = $this->queryOptions('period_options');
+                break;
             case 'years':
                 $result = $this->queryOptions('year_options');
                 break;

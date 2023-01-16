@@ -32,6 +32,7 @@ class CreateHandler
             isset($data['subIndicatorID']) &&
             isset($data['unitID']) &&
             isset($data['yearID']) &&
+            isset($data['periodID']) &&
             isset($data['value'])
         ) {
             $sanitizedData = [
@@ -41,6 +42,7 @@ class CreateHandler
                 'subIndicatorID' => htmlspecialchars(strip_tags($data['subIndicatorID'])),
                 'unitID' => htmlspecialchars(strip_tags($data['unitID'])),
                 'yearID' => htmlspecialchars(strip_tags($data['yearID'])),
+                'periodID' => htmlspecialchars(strip_tags($data['periodID'])),
                 'value' => htmlspecialchars(strip_tags($data['value']))
             ];
 
@@ -96,6 +98,7 @@ class CreateHandler
                     "subIndicatorID": 2,
                     "unitID": 1,
                     "yearID": 3,
+                    "periodID": 1,
                     "value": 123123.4323
                 }
             } 

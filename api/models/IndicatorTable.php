@@ -52,6 +52,7 @@ class IndicatorTable
         si.title as 'subIndicator',
         iu.title as 'unit',
         ir.indicator_value as 'value',
+        po.title as 'period',
         yo.title as 'year'
     FROM
         indicator_rows ir
@@ -59,6 +60,7 @@ class IndicatorTable
         INNER JOIN sub_indicator si ON ir.sub_indicator_id = si.id
         INNER JOIN indicator_unit iu ON ir.unit_id = iu.id
         INNER JOIN year_options yo ON ir.year_id = yo.id
+        INNER JOIN period_options po ON ir.period_id = po.id
     WHERE
         indicator_table_id = {$tableID}
     ORDER BY
@@ -77,6 +79,7 @@ class IndicatorTable
                 'subIndicator' => $subIndicator,
                 'unit' => $unit,
                 'year' => $year,
+                'period' => $period,
                 'value' => $value,
             );
 
@@ -97,6 +100,7 @@ class IndicatorTable
         si.title as 'subIndicator',
         iu.title as 'unit',
         ir.indicator_value as 'value',
+        po.title as 'period',
         yo.title as 'year'
     FROM
         indicator_rows ir
@@ -104,6 +108,7 @@ class IndicatorTable
         INNER JOIN sub_indicator si ON ir.sub_indicator_id = si.id
         INNER JOIN indicator_unit iu ON ir.unit_id = iu.id
         INNER JOIN year_options yo ON ir.year_id = yo.id
+        INNER JOIN period_options po ON ir.period_id = po.id
     WHERE indicator_table_id = {$tableID} AND ir.id = {$rowID} LIMIT 1;";
 
         $stmt = $this->conn->query($SQL_QUERY);
@@ -116,6 +121,7 @@ class IndicatorTable
             'subIndicator' => $subIndicator,
             'unit' => $unit,
             'year' => $year,
+            'period' => $year,
             'value' => $value,
         );
     }
@@ -155,6 +161,7 @@ class IndicatorTable
         $subIndicatorID = $data['subIndicatorID'];
         $unitID = $data['unitID'];
         $yearID = $data['yearID'];
+        $periodID = $data['periodID'];
         $value = $data['value'];
 
         $SQL_INSERT =  "INSERT INTO indicator_rows (
@@ -163,9 +170,17 @@ class IndicatorTable
             sub_indicator_id,
             unit_id,
             year_id,
+            period_id,
             indicator_value
         ) 
-        VALUES ({$tableID},{$locationID},{$subIndicatorID},{$unitID},{$yearID},{$value});";
+        VALUES (
+            {$tableID},
+            {$locationID},
+            {$subIndicatorID},
+            {$unitID},
+            {$yearID},
+            {$periodID},
+            {$value});";
 
         $stmt = $this->conn->prepare($SQL_INSERT);
         $isInserted =  $stmt->execute();
@@ -189,13 +204,15 @@ class IndicatorTable
                     'subIndicator' => null,
                     'unit' => null,
                     'year' => null,
+                    'period' => null,
                     'value' => null,
                 ];
                 $SQL_CHECK = [
                     'location' =>  "SELECT * FROM admin_location WHERE LOWER(title)='{$row['location']}'",
                     'subIndicator' => "SELECT * FROM sub_indicator WHERE LOWER(title)='{$row['subIndicator']}'",
                     'unit' => "SELECT * FROM indicator_unit WHERE LOWER(title)='{$row['unit']}'",
-                    'year' => "SELECT * FROM year_options WHERE LOWER(title)='{$row['year']}'"
+                    'period' => "SELECT * FROM period_options WHERE LOWER(title)='{$row['period']}'",
+                    'year' => "SELECT * FROM year_options WHERE LOWER(title)='{$row['year']}'",
                 ];
 
                 if (is_numeric($row_value)) {
@@ -225,7 +242,6 @@ class IndicatorTable
     }
     public function importCreateTable($tableName, $rowsData)
     {
-
         try {
             $insertedTable = null;
             $validatedRows = $this->validateRows($rowsData);
@@ -241,6 +257,7 @@ class IndicatorTable
                         sub_indicator_id,
                         unit_id,
                         year_id,
+                        period_id,
                         indicator_value
                     ) 
                     VALUES ({$insertedTable['id']},
@@ -248,6 +265,7 @@ class IndicatorTable
                     {$validatedRow['subIndicator']},
                     {$validatedRow['unit']},
                     {$validatedRow['year']},
+                    {$validatedRow['period']},
                     {$validatedRow['value']});";
 
                     $stmt = $this->conn->prepare($SQL_INSERT);
@@ -297,6 +315,7 @@ class IndicatorTable
         $locationID = $data['locationID'];
         $subIndicatorID = $data['subIndicatorID'];
         $unitID = $data['unitID'];
+        $periodID = $data['periodID'];
         $yearID = $data['yearID'];
         $value = $data['value'];
 
@@ -305,6 +324,7 @@ class IndicatorTable
             sub_indicator_id = {$subIndicatorID},
             unit_id = {$unitID},
             year_id = {$yearID},
+            period_id = {$periodID},
             indicator_value={$value} 
         WHERE indicator_table_id ={$tableID} AND id={$rowID};";
 

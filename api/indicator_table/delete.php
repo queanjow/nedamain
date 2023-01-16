@@ -76,7 +76,6 @@ class RequestHandler
                 "type": "row" | "table",
                 "data": {
                     "tableID": 1,
-                    "rowID": 1 | null,
                 }
             } 
         */

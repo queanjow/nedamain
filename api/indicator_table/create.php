@@ -25,11 +25,11 @@ class CreateHandler
     private function createTableRow($tableID, $data)
     {
         if (
-
             isset($data['locationID']) &&
             isset($data['subIndicatorID']) &&
             isset($data['unitID']) &&
             isset($data['yearID']) &&
+            isset($data['periodID']) &&
             isset($data['value'])
         ) {
             $sanitizedData = [
@@ -38,6 +38,7 @@ class CreateHandler
                 'subIndicatorID' => htmlspecialchars(strip_tags($data['subIndicatorID'])),
                 'unitID' => htmlspecialchars(strip_tags($data['unitID'])),
                 'yearID' => htmlspecialchars(strip_tags($data['yearID'])),
+                'periodID' => htmlspecialchars(strip_tags($data['periodID'])),
                 'value' => htmlspecialchars(strip_tags($data['value']))
             ];
 
@@ -97,6 +98,7 @@ class CreateHandler
                 isset($proccessedAssocKeyRowData['subindicator']) &&
                 isset($proccessedAssocKeyRowData['unit']) &&
                 isset($proccessedAssocKeyRowData['year']) &&
+                isset($proccessedAssocKeyRowData['period']) &&
                 isset($proccessedAssocKeyRowData['value']) &&
                 isset($tableName)
 
@@ -129,6 +131,7 @@ class CreateHandler
                     'subIndicator' => strtolower(htmlspecialchars(strip_tags($proccessedAssocKeyRowData['subindicator']))),
                     'unit' => strtolower(htmlspecialchars(strip_tags($proccessedAssocKeyRowData['unit']))),
                     'year' => strtolower(htmlspecialchars(strip_tags($proccessedAssocKeyRowData['year']))),
+                    'period' => strtolower(htmlspecialchars(strip_tags($proccessedAssocKeyRowData['period']))),
                     'value' => htmlspecialchars(strip_tags($proccessedAssocKeyRowData['value']))
                 ]);
             }
