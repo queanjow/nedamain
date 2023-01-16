@@ -35,7 +35,7 @@ const GenericDialog = ({
     return (
         <Dialog
             fullWidth={true}
-            maxWidth="md"
+            maxWidth="sm"
             open={isOpen}
             onClose={onCloseClicked}>
             <DialogTitle color={titleColor}>{dialogTitle}</DialogTitle>

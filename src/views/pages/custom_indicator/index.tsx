@@ -309,7 +309,7 @@ const CustomIndicatorDashboard = () => {
                 <GenericDialog
                     titleColor="error"
                     isOpen={showDelete}
-                    dialogTitle={"Oh no! You're trying to delete something..."}
+                    dialogTitle={"You're about to delete a table."}
                     dialogDesc={`Are you sure to delete table: ${currentTableData.name}`}
                     onCloseClicked={() => {
                         showDeleteHandler(false);
