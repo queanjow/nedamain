@@ -121,7 +121,7 @@ const routes = [
     },
     {
         path: '/custom-indicator-dashboard',
-        name: 'Custom Report',
+        name: 'Data Management',
         icon: 'ni ni-align-left-2 text-yellow',
         miniName: 'CID',
         component: CustomIndicatorDashboard,
