@@ -76,6 +76,7 @@ function DynamicIndicatorTable({
     >([]);
     const [unitOptions, setUnitOptions] = useState<ColumnOptions[]>([]);
     const [yearOptions, setYearOptions] = useState<ColumnOptions[]>([]);
+    const [periodOptions, setPeriodOptions] = useState<ColumnOptions[]>([]);
 
     const onInputEntryChangeHandler = (event) => {
         let key = event.target.name;
@@ -134,6 +135,10 @@ function DynamicIndicatorTable({
                 }
             })
             .catch((error) => console.log(error));
+    };
+
+    const getPeriodOptions = () => {
+        //TODO
     };
 
     const getUnitOptions = () => {
@@ -710,6 +715,29 @@ function DynamicIndicatorTable({
                             },
                             filter: selectFilter({
                                 options: yearOptions.map((item) => ({
+                                    value: item.name,
+                                    label: item.name
+                                })),
+                                withoutEmptyOption: false
+                            }),
+                            sort: true,
+                            align: 'center',
+                            headerAlign: 'center',
+                            headerFormatter: columnHeadFormat,
+                            title: () => `Double click to edit`
+                        },
+                        {
+                            dataField: 'period',
+                            text: 'Period',
+                            editor: {
+                                type: Type.SELECT,
+                                options: periodOptions.map((item) => ({
+                                    value: item.name,
+                                    label: item.name
+                                }))
+                            },
+                            filter: selectFilter({
+                                options: periodOptions.map((item) => ({
                                     value: item.name,
                                     label: item.name
                                 })),
