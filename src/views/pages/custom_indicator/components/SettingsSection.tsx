@@ -33,7 +33,7 @@ export default function SettingsSection({
             defaultCollapseIcon={<ArrowDropDownIcon />}
             defaultExpandIcon={<ArrowRightIcon />}
             defaultEndIcon={<div style={{ width: 24 }} />}
-            sx={{ height: 264, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}>
+            sx={{ flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}>
             {reportLists !== null
                 ? reportLists.map((value) => {
                       return (

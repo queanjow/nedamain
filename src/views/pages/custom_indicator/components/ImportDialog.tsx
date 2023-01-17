@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { Stack } from '@mui/system';
-import { IndicatorTableType } from '..';
+import { CustomTable } from '..';
 
 const { REACT_APP_API_URL } = process.env;
 type Props = {
@@ -37,7 +37,6 @@ const ImportDialog = ({
 }: Props) => {
     const [fileName, setFileName] = useState('');
     const [file, setFile] = useState();
-
     const fileReader = new FileReader();
 
     const handleOnChange = (e) => {
@@ -138,7 +137,10 @@ const ImportDialog = ({
             </DialogContent>
             <DialogActions>
                 <Button onClick={onCloseClicked}>Close</Button>
-                <Button onClick={onSaveHandler} variant="contained">
+                <Button
+                    type="submit"
+                    onClick={onSaveHandler}
+                    variant="contained">
                     Save
                 </Button>
             </DialogActions>

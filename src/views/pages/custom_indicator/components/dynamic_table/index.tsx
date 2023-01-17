@@ -428,6 +428,7 @@ function DynamicIndicatorTable({
         getUnitOptions();
         getPeriodOptions();
     }, [
+        JSON.stringify(tableData),
         JSON.stringify(subIndicatorOptions),
         JSON.stringify(locationOptions),
         JSON.stringify(yearOptions),
@@ -832,88 +833,49 @@ function DynamicIndicatorTable({
                     ]}
                     search>
                     {(props) => (
-                        <div style={{}} className="py-4">
+                        <div>
                             <Container fluid>
-                                <Row>
-                                    <Col xs={12} sm={6}>
-                                        <Button
-                                            className="btn-round btn-icon"
-                                            color="primary"
-                                            size="sm"
-                                            id="copy-tooltip"
-                                            onClick={() => {
-                                                // copyToClipboardAsTable(
-                                                //     document.getElementById(
-                                                //         'react-bs-table'
-                                                //     )
-                                                // );
-                                            }}>
-                                            <span className="btn-inner--icon mr-1">
-                                                <i className="fas fa-database" />
-                                            </span>
-                                            <span>Copy </span>
-                                        </Button>
-                                        <ReactToPrint
-                                            trigger={() => (
-                                                <Button
-                                                    color="primary"
-                                                    size="sm"
-                                                    className="buttons-copy buttons-html5"
-                                                    id="print-tooltip">
-                                                    <span className="btn-inner--icon mr-1">
-                                                        <i className="fas fa-print" />
-                                                    </span>
-                                                    <span>Print </span>
-                                                </Button>
-                                            )}
-                                            content={() => componentRef.current}
-                                            pageStyle={
-                                                "'@media print { body { -webkit-print-color-adjust: exact; } @page { size: A4; margin: 200mm !important }}'"
-                                            }
-                                        />
-                                        <ExportCSVButton
-                                            id="csv-tooltip"
-                                            className="btn-round btn-icon btn btn-primary btn-sm"
-                                            {...props.csvProps}>
-                                            <span className="btn-inner--icon mr-1">
-                                                <i className="fas fa-file-export" />
-                                            </span>
-                                            <span>Export CSV Bulk Data</span>
-                                        </ExportCSVButton>
-                                        <UncontrolledTooltip
-                                            placement="top"
-                                            target="csv-tooltip">
-                                            This will generate csv file based on
-                                            available data
-                                        </UncontrolledTooltip>
-                                        <UncontrolledTooltip
-                                            placement="top"
-                                            target="print-tooltip">
-                                            This will open a print page with the
-                                            visible rows of the table.
-                                        </UncontrolledTooltip>
-                                        <UncontrolledTooltip
-                                            placement="top"
-                                            target="copy-tooltip">
-                                            This will copy to your clipboard the
-                                            visible rows of the table.
-                                        </UncontrolledTooltip>
-                                    </Col>
-                                    <Col xs={12} sm={6}>
-                                        <div
-                                            id="datatable-basic_filter"
-                                            className="dataTables_filter px-4 pb-1 float-right">
-                                            <label>
-                                                Search:
-                                                <SearchBar
-                                                    className="form-control-sm"
-                                                    placeholder=""
-                                                    {...props.searchProps}
-                                                />
-                                            </label>
-                                        </div>
-                                    </Col>
-                                </Row>
+                                <Col className="my-4" xs={12} sm={6}>
+                                    <ReactToPrint
+                                        trigger={() => (
+                                            <Button
+                                                color="primary"
+                                                size="sm"
+                                                className="buttons-copy buttons-html5"
+                                                id="print-tooltip">
+                                                <span className="btn-inner--icon mr-1">
+                                                    <i className="fas fa-print" />
+                                                </span>
+                                                <span>Print </span>
+                                            </Button>
+                                        )}
+                                        content={() => componentRef.current}
+                                        pageStyle={
+                                            "'@media print { body { -webkit-print-color-adjust: exact; } @page { size: A4; margin: 200mm !important }}'"
+                                        }
+                                    />
+                                    <ExportCSVButton
+                                        id="csv-tooltip"
+                                        className="btn-round btn-icon btn btn-primary btn-sm"
+                                        {...props.csvProps}>
+                                        <span className="btn-inner--icon mr-1">
+                                            <i className="fas fa-file-export" />
+                                        </span>
+                                        <span>Export CSV Bulk Data</span>
+                                    </ExportCSVButton>
+                                    <UncontrolledTooltip
+                                        placement="top"
+                                        target="csv-tooltip">
+                                        This will generate csv file based on
+                                        available data
+                                    </UncontrolledTooltip>
+                                    <UncontrolledTooltip
+                                        placement="top"
+                                        target="print-tooltip">
+                                        This will open a print page with the
+                                        visible rows of the table.
+                                    </UncontrolledTooltip>
+                                </Col>
                             </Container>
                             <BootstrapTable
                                 ref={componentRef}

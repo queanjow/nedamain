@@ -50,7 +50,7 @@ export interface AddRowRequest {
     periodID: number;
     value: number;
 }
-export interface IndicatorTableType {
+export interface CustomTable {
     id: number;
     name: string;
     rows: RowResponse[];
@@ -64,7 +64,7 @@ const CustomIndicatorDashboard = () => {
     const [showEditIndicatorName, setShowEditIndicatorName] = useState(false);
     const [showImportCSV, setShowImportCSV] = useState(false);
     const [currentTableData, setCurrentTableData] =
-        useState<IndicatorTableType | null>(null);
+        useState<CustomTable | null>(null);
     const [tableList, setTableList] = useState<
         { id: number; name: string }[] | null
     >(null);
@@ -90,14 +90,12 @@ const CustomIndicatorDashboard = () => {
     };
     const onReportListClicked = (tableID: number) => {
         axios
-            .get<IndicatorTableType>(
+            .get<CustomTable>(
                 `${REACT_APP_API_URL}/indicator_table/read.php?type=table&id=${tableID}`
             )
             .then((res) => {
                 if (res.status === 200) {
                     setCurrentTableData(res.data);
-                    setTableKey(nanoid());
-                    console.log(res.data);
                 } else {
                 }
             });
@@ -115,13 +113,11 @@ const CustomIndicatorDashboard = () => {
             )
             .then((res) => {
                 if (res.status === 200) {
-                    console.log('ADDED DDDDDDDDD');
-                    console.log(res.data);
-                    const tempRow = [...currentTableData.rows];
-                    tempRow.push(res.data);
-                    setCurrentTableData({ ...currentTableData, rows: tempRow });
-                    setTableKey(nanoid());
-                } else {
+                    setCurrentTableData((prevaState) => {
+                        const tempRow = [...prevaState.rows];
+                        tempRow.push(res.data);
+                        return { ...currentTableData, rows: tempRow };
+                    });
                 }
             });
     };
@@ -139,8 +135,7 @@ const CustomIndicatorDashboard = () => {
             )
             .then((res) => {
                 if (res.status === 200) {
-                    setTableList([...tableList, res.data]);
-                } else {
+                    setTableList((prevState) => [...prevState, res.data]);
                 }
             });
     };
@@ -196,21 +191,26 @@ const CustomIndicatorDashboard = () => {
             )
             .then((res) => {
                 if (res.status === 200 && res.data.message === 'deleted') {
-                    currentTableData.rows.every((row, rowIndex) => {
-                        if (row.id === rowEntryID) {
-                            const tempRows = [...currentTableData.rows];
-                            tempRows.splice(rowIndex, 1);
-                            setCurrentTableData({
-                                ...currentTableData,
-                                rows: tempRows
-                            });
-                            return false;
-                        }
-                        return true;
+                    setCurrentTableData((prevVal) => {
+                        const tempRows = [...prevVal.rows];
+                        let returnVal = prevVal;
+
+                        prevVal.rows.every((row, rowIndex) => {
+                            if (row.id === rowEntryID) {
+                                tempRows.splice(rowIndex, 1);
+                                returnVal = {
+                                    ...prevVal,
+                                    rows: tempRows
+                                };
+                                console.log(tempRows);
+                                return false;
+                            }
+                            return true;
+                        });
+                        return returnVal;
                     });
+
                     showDeleteHandler(false);
-                    setTableKey(nanoid());
-                } else {
                 }
             });
     };
@@ -296,6 +296,7 @@ const CustomIndicatorDashboard = () => {
         <Box
             sx={{
                 flexGrow: 1,
+                minHeight: 720,    
                 position: 'relative',
                 flexDirection: 'column',
                 display: 'flex'
@@ -347,7 +348,7 @@ const CustomIndicatorDashboard = () => {
                 }}></NewIndicatorDialog>
             <ImportDialog
                 title={'Import CSV'}
-                message={'Please click select a CSV file to import.'}
+                message={'Please click to select a CSV file to import.'}
                 isOpen={showImportCSV}
                 onCloseClicked={() => {
                     setShowImportCSV(false);
@@ -457,7 +458,7 @@ const CustomIndicatorDashboard = () => {
                     {currentTableData !== null ? (
                         <Box pt={2}>
                             <DynamicIndicatorTable
-                                key={tableKey}
+                                // key={tableKey}
                                 onEditRowEntry={onEditRowEntry}
                                 onDeleteEntry={onDeleteRowEntry}
                                 onAddNewEntry={onAddRowEntry}
