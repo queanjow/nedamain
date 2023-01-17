@@ -36,8 +36,6 @@ function Login() {
     });
     const history = useHistory();
 
-    console.log({ email, password });
-
     const onChangeInput = (e) => {
         setFormData({
             ...formData,

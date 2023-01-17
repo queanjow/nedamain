@@ -27,7 +27,7 @@ import ToolkitProvider, {
     CSVExport
 } from 'react-bootstrap-table2-toolkit';
 import ReactToPrint from 'react-to-print';
-import { RowResponse, RowRequest } from '../..';
+import { RowResponse, RowRequest, AddRowRequest } from '../..';
 
 const { REACT_APP_API_URL } = process.env;
 interface ColumnOptions {
@@ -47,7 +47,7 @@ type Props = {
         row: RowRequest,
         responseCallback: (isSuccess: boolean) => void
     ) => void;
-    onAddNewEntry: (tableID: number, rowData: RowRequest) => void;
+    onAddNewEntry: (tableID: number, rowData: AddRowRequest) => void;
 };
 function DynamicIndicatorTable({
     tableData,
@@ -59,17 +59,17 @@ function DynamicIndicatorTable({
     const componentRef = React.useRef(null);
     const { SearchBar } = Search;
     const { ExportCSVButton } = CSVExport;
-    const [modalShow, setModalShow] = React.useState(false);
+    const [addEntryModal, setShowAddEntryModal] = React.useState(false);
     const [alert, setalert] = React.useState<JSX.Element | null>(null);
     const notificationAlertRef = React.useRef(null);
-    const [inputEntry, setInputEntry] = useState<RowRequest>({
-        id: 0,
-        locationID: 1,
-        subIndicatorID: 1,
-        unitID: 1,
-        yearID: 1,
-        value: 1
-    });
+    const [inputEntry, setInputEntry] = useState<AddRowRequest>({
+        locationID: null,
+        subIndicatorID: null,
+        unitID: null,
+        yearID: null,
+        periodID: null,
+        value: 0
+    } as AddRowRequest);
     const [locationOptions, setLocationOptions] = useState<ColumnOptions[]>([]);
     const [subIndicatorOptions, setSubIndicatorOptions] = useState<
         ColumnOptions[]
@@ -85,6 +85,8 @@ function DynamicIndicatorTable({
         if (key !== 'value') {
             key = key + 'ID';
         }
+
+        console.log(key + ' ' + value);
         setInputEntry((values) => ({ ...values, [key]: value }));
     };
 
@@ -96,6 +98,10 @@ function DynamicIndicatorTable({
             .then((response) => {
                 const { data } = response;
                 if (response.status === 200) {
+                    setInputEntry((prevState) => ({
+                        ...prevState,
+                        locationID: data[0].id
+                    }));
                     setLocationOptions(data);
                 } else {
                     //error handle section
@@ -104,7 +110,7 @@ function DynamicIndicatorTable({
             .catch((error) => console.log(error));
     };
 
-    const getSubIndicOptions = () => {
+    const getSubIndicatorOptions = () => {
         axios
             .get<ColumnOptions[]>(
                 `${REACT_APP_API_URL}/indicator_table/read.php?type=columnOptions&columnType=subIndicators`
@@ -112,6 +118,10 @@ function DynamicIndicatorTable({
             .then((response) => {
                 const { data } = response;
                 if (response.status === 200) {
+                    setInputEntry((prevState) => ({
+                        ...prevState,
+                        subIndicatorID: data[0].id
+                    }));
                     setSubIndicatorOptions(data);
                 } else {
                     //error handle section
@@ -128,7 +138,10 @@ function DynamicIndicatorTable({
             .then((response) => {
                 const { data } = response;
                 if (response.status === 200) {
-                    //check the api call is success by stats code 200,201 ...etc
+                    setInputEntry((prevState) => ({
+                        ...prevState,
+                        yearID: data[0].id
+                    }));
                     setYearOptions(data);
                 } else {
                     //error handle section
@@ -138,7 +151,23 @@ function DynamicIndicatorTable({
     };
 
     const getPeriodOptions = () => {
-        //TODO
+        axios
+            .get<ColumnOptions[]>(
+                `${REACT_APP_API_URL}/indicator_table/read.php?type=columnOptions&columnType=periods`
+            )
+            .then((response) => {
+                const { data } = response;
+                if (response.status === 200) {
+                    setInputEntry((prevState) => ({
+                        ...prevState,
+                        periodID: data[0].id
+                    }));
+                    setPeriodOptions(data);
+                } else {
+                    //error handle section
+                }
+            })
+            .catch((error) => console.log(error));
     };
 
     const getUnitOptions = () => {
@@ -149,7 +178,10 @@ function DynamicIndicatorTable({
             .then((response) => {
                 const { data } = response;
                 if (response.status === 200) {
-                    //check the api call is success by stats code 200,201 ...etc
+                    setInputEntry((prevState) => ({
+                        ...prevState,
+                        unitID: data[0].id
+                    }));
                     setUnitOptions(data);
                 } else {
                     //error handle section
@@ -341,6 +373,9 @@ function DynamicIndicatorTable({
                 case 'unit':
                     optionArray = unitOptions;
                     break;
+                case 'period':
+                    optionArray = periodOptions;
+                    break;
                 case 'year':
                     optionArray = yearOptions;
                     break;
@@ -358,12 +393,13 @@ function DynamicIndicatorTable({
 
             return resultID;
         };
-        console.log(row);
+
         const resultRow = {
             id: row['id'],
             locationID: findOptionID('location', row['location']),
             subIndicatorID: findOptionID('subIndicator', row['subIndicator']),
             unitID: findOptionID('unit', row['unit']),
+            periodID: findOptionID('period', row['period']),
             yearID: findOptionID('year', row['year']),
             value: row['value']
         } as RowRequest;
@@ -379,23 +415,24 @@ function DynamicIndicatorTable({
         return number.toLocaleString('Php');
     }
 
-    // Handler Region
-    const onAddEntryHandler = (entryData: RowRequest) => {
+    const onAddEntryHandler = (entryData: AddRowRequest) => {
         onAddNewEntry(tableData.id, entryData);
+        console.log(entryData);
         addnotify('success');
     };
 
     useEffect(() => {
-        console.log('use effect called!');
-        getSubIndicOptions();
+        getSubIndicatorOptions();
         getLocationOptions();
         getYearsOptions();
         getUnitOptions();
+        getPeriodOptions();
     }, [
         JSON.stringify(subIndicatorOptions),
         JSON.stringify(locationOptions),
         JSON.stringify(yearOptions),
-        JSON.stringify(unitOptions)
+        JSON.stringify(unitOptions),
+        JSON.stringify(periodOptions)
     ]);
 
     return (
@@ -405,202 +442,198 @@ function DynamicIndicatorTable({
                 <NotificationAlert ref={notificationAlertRef} />
             </div>
             {/* Start Region: Add new data  */}
-            {subIndicatorOptions.length !== 0 &&
-            locationOptions.length !== 0 &&
-            yearOptions.length !== 0 &&
-            unitOptions.length !== 0 ? (
-                <Modal
-                    className="modal-dialog-centered"
-                    isOpen={modalShow}
-                    toggle={() => setModalShow(false)}
-                    // to={`povertystat/${povertystats.id}/edit`}
-                >
-                    <div className="modal-header">
-                        <h6 className="modal-title" id="modal-title-default">
-                            Add Entry
-                        </h6>
-                        <button
-                            aria-label="Close"
-                            className="close"
-                            data-dismiss="modal"
-                            type="button"
-                            onClick={() => setModalShow(false)}>
-                            <span aria-hidden={true}>x</span>
-                        </button>
-                    </div>
-                    <div className="modal-body">
-                        <Form>
-                            {/* <FormGroup className="row">
+            <Modal
+                className="modal-dialog-centered"
+                isOpen={addEntryModal}
+                toggle={() => setShowAddEntryModal(false)}>
+                <div className="modal-header">
+                    <h6 className="modal-title" id="modal-title-default">
+                        Add Entry
+                    </h6>
+                    <button
+                        aria-label="Close"
+                        className="close"
+                        data-dismiss="modal"
+                        type="button"
+                        onClick={() => setShowAddEntryModal(false)}>
+                        <span aria-hidden={true}>x</span>
+                    </button>
+                </div>
+                <div className="modal-body">
+                    <Form>
+                        <FormGroup className="row">
                             <Label
                                 className="form-control-label"
                                 htmlFor="example-text-input"
                                 md="2">
-                                Indicator
+                                Location
                             </Label>
                             <Col md="10">
                                 <Input
-                                    placeholder="Indicator"
+                                    disabled={inputEntry.locationID === null}
+                                    placeholder="Please Select Location"
+                                    defaultValue={inputEntry.locationID}
+                                    id="location"
+                                    name="location"
+                                    type="select"
+                                    required
+                                    onChange={onInputEntryChangeHandler}>
+                                    <option disabled>Please Select</option>
+                                    {locationOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </Col>
+                        </FormGroup>
+                        <FormGroup className="row">
+                            <Label
+                                className="form-control-label"
+                                htmlFor="example-date-input"
+                                md="2">
+                                Sub Indicator
+                            </Label>
+                            <Col md="10">
+                                <Input
+                                    disabled={
+                                        inputEntry.subIndicatorID === null
+                                    }
+                                    placeholder="Please Select Sub Indicator"
+                                    defaultValue={inputEntry.subIndicatorID}
                                     id="sub-indicator"
-                                    defaultValue={tableData.name}
                                     name="subIndicator"
-                                    type="text"
-                                    value={tableData.name}
-                                    disabled
+                                    type="select"
+                                    required
+                                    onChange={onInputEntryChangeHandler}>
+                                    <option disabled>Please Select</option>
+                                    {subIndicatorOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </Col>
+                        </FormGroup>
+                        <FormGroup className="row">
+                            <Label
+                                className="form-control-label"
+                                htmlFor="example-date-input"
+                                md="2">
+                                Year
+                            </Label>
+                            <Col md="10">
+                                <Input
+                                    disabled={inputEntry.yearID === null}
+                                    placeholder="Please Select Year"
+                                    defaultValue={inputEntry.yearID}
+                                    id="year"
+                                    name="year"
+                                    type="select"
+                                    required
+                                    onChange={onInputEntryChangeHandler}>
+                                    <option disabled>Please Select</option>
+                                    {yearOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </Col>
+                        </FormGroup>
+                        <FormGroup className="row">
+                            <Label
+                                className="form-control-label"
+                                htmlFor="example-password-input"
+                                md="2">
+                                Unit
+                            </Label>
+                            <Col md="10">
+                                <Input
+                                    disabled={inputEntry.unitID === null}
+                                    placeholder="Please Select Unit"
+                                    defaultValue={inputEntry.unitID}
+                                    id="unit"
+                                    name="unit"
+                                    type="select"
+                                    required
+                                    onChange={onInputEntryChangeHandler}>
+                                    <option disabled>Please Select</option>
+                                    {unitOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </Col>
+                        </FormGroup>
+                        <FormGroup className="row">
+                            <Label
+                                className="form-control-label"
+                                htmlFor="example-password-input"
+                                md="2">
+                                Period
+                            </Label>
+                            <Col md="10">
+                                <Input
+                                    disabled={inputEntry.periodID === null}
+                                    placeholder="Please Select Period"
+                                    defaultValue={inputEntry.periodID}
+                                    id="period"
+                                    name="period"
+                                    type="select"
+                                    required
+                                    onChange={onInputEntryChangeHandler}>
+                                    <option disabled>Please Select</option>
+                                    {periodOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </Col>
+                        </FormGroup>
+                        <FormGroup className="row">
+                            <Label
+                                className="form-control-label"
+                                htmlFor="example-tel-input"
+                                md="2">
+                                Value
+                            </Label>
+                            <Col md="10">
+                                <Input
+                                    placeholder="Please add value"
+                                    defaultValue={inputEntry.value}
+                                    htmlFor="example-text-input"
+                                    id="value"
+                                    name="value"
+                                    type="number"
+                                    required
+                                    onChange={onInputEntryChangeHandler}
                                 />
                             </Col>
-                        </FormGroup> */}
-                            <FormGroup className="row">
-                                <Label
-                                    className="form-control-label"
-                                    htmlFor="example-text-input"
-                                    md="2">
-                                    Location
-                                </Label>
-                                <Col md="10">
-                                    <Input
-                                        placeholder="Please Select Location"
-                                        defaultValue={locationOptions[0].id}
-                                        id="location"
-                                        name="location"
-                                        type="select"
-                                        required
-                                        onChange={onInputEntryChangeHandler}>
-                                        <option disabled>Please Select</option>
-                                        {locationOptions.map((item) => (
-                                            <option
-                                                key={item.id}
-                                                value={item.id}>
-                                                {item.name}
-                                            </option>
-                                        ))}
-                                    </Input>
-                                </Col>
-                            </FormGroup>
-                            <FormGroup className="row">
-                                <Label
-                                    className="form-control-label"
-                                    htmlFor="example-date-input"
-                                    md="2">
-                                    Sub Indicator
-                                </Label>
-                                <Col md="10">
-                                    <Input
-                                        placeholder="Please Select Sub Indicator"
-                                        defaultValue={subIndicatorOptions[0].id}
-                                        id="sub-indicator"
-                                        name="subIndicator"
-                                        type="select"
-                                        required
-                                        onChange={onInputEntryChangeHandler}>
-                                        <option disabled>Please Select</option>
-                                        {subIndicatorOptions.map((item) => (
-                                            <option
-                                                key={item.id}
-                                                value={item.id}>
-                                                {item.name}
-                                            </option>
-                                        ))}
-                                    </Input>
-                                </Col>
-                            </FormGroup>
-                            <FormGroup className="row">
-                                <Label
-                                    className="form-control-label"
-                                    htmlFor="example-date-input"
-                                    md="2">
-                                    Year
-                                </Label>
-                                <Col md="10">
-                                    <Input
-                                        placeholder="Please Select Year"
-                                        defaultValue={yearOptions[0].id}
-                                        id="year"
-                                        name="year"
-                                        type="select"
-                                        required
-                                        onChange={onInputEntryChangeHandler}>
-                                        <option disabled>Please Select</option>
-                                        {yearOptions.map((item) => (
-                                            <option
-                                                key={item.id}
-                                                value={item.id}>
-                                                {item.name}
-                                            </option>
-                                        ))}
-                                    </Input>
-                                </Col>
-                            </FormGroup>
-                            <FormGroup className="row">
-                                <Label
-                                    className="form-control-label"
-                                    htmlFor="example-tel-input"
-                                    md="2">
-                                    Value
-                                </Label>
-                                <Col md="10">
-                                    <Input
-                                        placeholder="Please add value"
-                                        defaultValue={20.23}
-                                        htmlFor="example-text-input"
-                                        id="value"
-                                        name="value"
-                                        type="number"
-                                        required
-                                        onChange={onInputEntryChangeHandler}
-                                    />
-                                </Col>
-                            </FormGroup>
-                            <FormGroup className="row">
-                                <Label
-                                    className="form-control-label"
-                                    htmlFor="example-password-input"
-                                    md="2">
-                                    Unit
-                                </Label>
-                                <Col md="10">
-                                    <Input
-                                        placeholder="Please Select Unit"
-                                        defaultValue={unitOptions[0].id}
-                                        id="unit"
-                                        name="unit"
-                                        type="select"
-                                        required
-                                        onChange={onInputEntryChangeHandler}>
-                                        <option disabled>Please Select</option>
-                                        {unitOptions.map((item) => (
-                                            <option
-                                                key={item.id}
-                                                value={item.id}>
-                                                {item.name}
-                                            </option>
-                                        ))}
-                                    </Input>
-                                </Col>
-                            </FormGroup>
-                            <div className="modal-footer">
-                                <Button
-                                    color="primary"
-                                    onClick={() => {
-                                        setModalShow(false);
-                                        onAddEntryHandler(inputEntry);
-                                    }}>
-                                    Add
-                                </Button>
-                                <Button
-                                    className="ml-auto"
-                                    color="link"
-                                    data-dismiss="modal"
-                                    type="button"
-                                    onClick={() => setModalShow(false)}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        </Form>
-                    </div>
-                </Modal>
-            ) : (
-                ''
-            )}
+                        </FormGroup>
+                        <div className="modal-footer">
+                            <Button
+                                color="primary"
+                                onClick={() => {
+                                    setShowAddEntryModal(false);
+                                    onAddEntryHandler(inputEntry);
+                                }}>
+                                Add
+                            </Button>
+                            <Button
+                                className="ml-auto"
+                                color="link"
+                                data-dismiss="modal"
+                                type="button"
+                                onClick={() => setShowAddEntryModal(false)}>
+                                Cancel
+                            </Button>
+                        </div>
+                    </Form>
+                </div>
+            </Modal>
 
             <div className="col">
                 <Row>
@@ -613,7 +646,7 @@ function DynamicIndicatorTable({
                             color="primary"
                             id="tooltip-add-entry"
                             onClick={() => {
-                                setModalShow(true);
+                                setShowAddEntryModal(true);
                             }}
                             size="sm">
                             <span className="btn-inner--icon mr-1">

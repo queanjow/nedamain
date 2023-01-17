@@ -10,7 +10,8 @@ import {
     Snackbar,
     IconButton,
     Alert,
-    AlertColor
+    AlertColor,
+    Tooltip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import LayersClearIcon from '@mui/icons-material/LayersClear';
@@ -27,6 +28,7 @@ export interface RowResponse {
     subIndicator: string;
     unit: string;
     year: string;
+    period: string;
     value: number;
 }
 
@@ -36,6 +38,16 @@ export interface RowRequest {
     subIndicatorID: number;
     unitID: number;
     yearID: number;
+    periodID: number;
+    value: number;
+}
+
+export interface AddRowRequest {
+    locationID: number;
+    subIndicatorID: number;
+    unitID: number;
+    yearID: number;
+    periodID: number;
     value: number;
 }
 export interface IndicatorTableType {
@@ -44,6 +56,7 @@ export interface IndicatorTableType {
     rows: RowResponse[];
 }
 const { REACT_APP_API_URL } = process.env;
+
 const CustomIndicatorDashboard = () => {
     const [tableKey, setTableKey] = useState(nanoid());
     const [showDelete, setShowDelete] = useState(false);
@@ -90,7 +103,7 @@ const CustomIndicatorDashboard = () => {
             });
     };
 
-    const onAddRowEntry = (tableID: number, rowData: RowRequest) => {
+    const onAddRowEntry = (tableID: number, rowData: AddRowRequest) => {
         axios
             .post<RowResponse>(
                 `${REACT_APP_API_URL}/indicator_table/create.php`,
@@ -102,6 +115,8 @@ const CustomIndicatorDashboard = () => {
             )
             .then((res) => {
                 if (res.status === 200) {
+                    console.log('ADDED DDDDDDDDD');
+                    console.log(res.data);
                     const tempRow = [...currentTableData.rows];
                     tempRow.push(res.data);
                     setCurrentTableData({ ...currentTableData, rows: tempRow });

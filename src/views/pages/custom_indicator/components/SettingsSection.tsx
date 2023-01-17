@@ -34,9 +34,7 @@ export default function SettingsSection({
             defaultExpandIcon={<ArrowRightIcon />}
             defaultEndIcon={<div style={{ width: 24 }} />}
             sx={{ height: 264, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}>
-            {reportLists !== null &&
-            Array.isArray(reportLists) &&
-            reportLists.length !== 0
+            {reportLists !== null
                 ? reportLists.map((value) => {
                       return (
                           <StyledTreeItem
