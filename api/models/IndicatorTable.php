@@ -121,7 +121,7 @@ class IndicatorTable
             'subIndicator' => $subIndicator,
             'unit' => $unit,
             'year' => $year,
-            'period' => $year,
+            'period' => $period,
             'value' => $value,
         );
     }
