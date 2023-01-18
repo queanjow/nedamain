@@ -135,6 +135,7 @@ const CustomIndicatorDashboard = () => {
             )
             .then((res) => {
                 if (res.status === 200) {
+                    console.log(res.data);
                     setTableList((prevState) => [...prevState, res.data]);
                 }
             });
@@ -296,7 +297,7 @@ const CustomIndicatorDashboard = () => {
         <Box
             sx={{
                 flexGrow: 1,
-                minHeight: 720,    
+                minHeight: 720,
                 position: 'relative',
                 flexDirection: 'column',
                 display: 'flex'

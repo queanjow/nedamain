@@ -109,6 +109,10 @@ class RequestHandler
             http_response_code(404);
             echo json_encode(['message' => $err->getMessage()]);
             die();
+        } catch (PDOException $err) {
+            echo json_encode(['message' => "Somethin went wrong in SQL"]);
+            http_response_code(404);
+            die();
         }
     }
 }

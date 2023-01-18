@@ -197,7 +197,8 @@ class IndicatorTable
         $rowsID_Assoc = array();
 
         if (count($rowsData) > 0) {
-            foreach ($rowsData as $row) {
+            foreach ($rowsData as $key => $row) {
+                $csvRowIndex = $key + 2;
                 $row_value = $row['value'];
                 $DB_ASSOC_ID_AND_VAL = [
                     'location' => null,
@@ -218,7 +219,7 @@ class IndicatorTable
                 if (is_numeric($row_value)) {
                     $DB_ASSOC_ID_AND_VAL['value'] = $row_value;
                 } else {
-                    throw new Exception("Value is not numeric!");
+                    throw new Exception("Value is not numeric at row index: {$csvRowIndex}");
                 }
 
                 foreach ($SQL_CHECK as $key => $value) {
@@ -226,7 +227,8 @@ class IndicatorTable
                     $res = $stmt->fetch();
 
                     if (!$res) {
-                        throw new Exception("No {$key} value found.");
+                        throw new Exception("No such thing as \"{$row[$key]}\" value found in {$key} options at row index: {$csvRowIndex} in the CSV. 
+                        Please provide only values that are present in the {$key} option");
                     } else {
                         $DB_ASSOC_ID_AND_VAL[$key] = $res['id'];
                     }

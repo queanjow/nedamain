@@ -85,41 +85,62 @@ class CreateHandler
         $results = array_combine($keys, array_values($assocArray));
         return array_change_key_case($results, CASE_LOWER);
     }
+    private function checkImportRow($rowData, $rowIndex)
+    {
+        $status = [
+            'isValid' => true,
+            'message' => ''
+        ];
+        $expectedHeaders = [
+            'location',
+            'subindicator',
+            'unit',
+            'year',
+            'period',
+            'value'
+        ];
+        $proccessedAssocKeyRowData = $this->proccessAssocKeys($rowData);
+
+        foreach ($expectedHeaders as $header) {
+            if (!isset($proccessedAssocKeyRowData[$header])) {
+                $indexInExcel = $rowIndex + 2;
+                $status = [
+                    'isValid' => false,
+                    'message' => "No \"{$header}\" value found at index: {$indexInExcel} in CSV. 
+                    Make sure all the values are present in every row and must suffice with the available options 
+                    provided in every column respectively."
+                ];
+                break;
+            }
+        }
+
+        return $status;
+    }
 
     private function checkImportedContents($tableName, $rowsData)
     {
+        foreach ($rowsData as $index => $row) {
+            if (isset($tableName)) {
+                $status =   $this->checkImportRow($row, $index);
 
-        $isCorrect = false;
-        foreach ($rowsData as $row) {
-            $proccessedAssocKeyRowData = $this->proccessAssocKeys($row);
-
-            if (
-                isset($proccessedAssocKeyRowData['location']) &&
-                isset($proccessedAssocKeyRowData['subindicator']) &&
-                isset($proccessedAssocKeyRowData['unit']) &&
-                isset($proccessedAssocKeyRowData['year']) &&
-                isset($proccessedAssocKeyRowData['period']) &&
-                isset($proccessedAssocKeyRowData['value']) &&
-                isset($tableName)
-
-            ) {
-                $isCorrect = true;
+                if (!$status['isValid']) {
+                    http_response_code(203);
+                    echo json_encode(['message' => $status['message']]);
+                    die();
+                }
             } else {
                 http_response_code(203);
-                echo json_encode(['message' => "Doesn't match the required table structure!"]);
+                echo json_encode(['message' => "No table name found."]);
                 die();
             }
         }
-        return $isCorrect;
     }
 
     private function importCSV($tableName, $rowsData)
     {
 
-        if (
-            is_array($rowsData) &&
-            $this->checkImportedContents($tableName, $rowsData)
-        ) {
+        if (is_array($rowsData)) {
+            $this->checkImportedContents($tableName, $rowsData);
             $sanitizedRows = array();
             $sanitzedTableName = htmlspecialchars(strip_tags(preg_replace('/\\.[^.\\s]{3,4}$/', '', $tableName)));
 
@@ -231,6 +252,10 @@ class CreateHandler
             }
         } catch (Error $err) {
             echo json_encode(['message' => $err->getMessage()]);
+            http_response_code(404);
+            die();
+        } catch (PDOException $err) {
+            echo json_encode(['message' => "Somethin went wrong in SQL"]);
             http_response_code(404);
             die();
         }
