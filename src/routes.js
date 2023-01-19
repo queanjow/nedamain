@@ -28,13 +28,13 @@ import CustomIndicatorDashboard from 'views/pages/custom_indicator';
 const routes = [
     {
         path: '/geographical-data',
-        name: 'Geographical Data',
+        name: 'Geographical Data and Data Visualization',
         icon: 'ni ni-pin-3 text-orange',
         miniName: 'GIS',
         component: Geomap,
         layout: '/admin'
     },
-    {
+    /*{
         collapse: true,
         name: 'Data Visualization',
         icon: 'ni ni-chart-pie-35 text-info',
@@ -118,8 +118,8 @@ const routes = [
                 layout: '/admin'
             }
         ]
-    },
-    {
+    },*/
+   {
         path: '/custom-indicator-dashboard',
         name: 'Data Management',
         icon: 'ni ni-align-left-2 text-yellow',

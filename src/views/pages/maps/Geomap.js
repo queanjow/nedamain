@@ -17,7 +17,7 @@ function Geomap() {
                                     width="100%"
                                     height="1500px"
                                     src={
-                                        'https://datastudio.google.com/embed/reporting/faf5fa28-1028-4854-87a1-790282ec655d/page/sEE8C'
+                                        'https://datastudio.google.com/embed/reporting/64857891-7218-4800-b466-4842bf1c0ce2/page/gwxCD'
                                     }
                                     allowFullScreen
                                     frameBorder="0"
