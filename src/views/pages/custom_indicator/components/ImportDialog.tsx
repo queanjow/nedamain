@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { Stack } from '@mui/system';
-import { CustomTable } from '..';
 
 const { REACT_APP_API_URL } = process.env;
 type Props = {
@@ -44,8 +43,6 @@ const ImportDialog = ({
         setFile(e.target.files[0]);
     };
     const submitCSVRequest = (rows) => {
-        console.log(typeof rows);
-        console.log(rows);
         axios
             .post(`${REACT_APP_API_URL}/indicator_table/create.php`, {
                 createType: 'import',
